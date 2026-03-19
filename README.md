@@ -1,17 +1,14 @@
-# Project Title
+# pg-extract-schema by Hannah Vernon
 
 ## Overview
 This project is designed to extract schema information from PostgreSQL databases in an efficient and comprehensive manner.
 
 ## Features
-- Extract schema details, including tables, views, indexes, and constraints.
-- Support for multiple output formats.
-- Configurable extraction options.
+- Extract schema details, including tables, views, indexes, sequences, and constraints.
 
 ## Requirements
 - PostgreSQL 9.6 or later.
-- Python 3.x.
-- psycopg2 library for database connections.
+- DotNet 9.0 Runtime or later.
 
 ## Installation
 1. Clone the repository:
@@ -19,31 +16,41 @@ This project is designed to extract schema information from PostgreSQL databases
    git clone https://github.com/HannahVernon/pg-extract-schema.git
    cd pg-extract-schema
    ```
-2. Install dependencies:
+2. Install dependencies
    ```bash
-   pip install -r requirements.txt
+   winget install Microsoft.DotNet.SDK.9
+   ```
+3. Build the binaries.
+   ```bash
+   dotnet build
    ```
 
 ## Usage
-Run the script with appropriate parameters:
+Run the executable with appropriate parameters:
 ```bash
-python extract_schema.py --db <database_name> --user <username> --password <password> --format <output_format>
+Description:
+  Extract DDL from a PostgreSQL database into discrete .sql files
+
+Usage:
+  pg-extract-schema [options]
+
+Options:
+  -h, --host <host> (REQUIRED)          PostgreSQL server hostname
+  -p, --port <port>                     PostgreSQL server port [default: 5432]
+  -d, --database <database> (REQUIRED)  Database name
+  -s, --schema <schema>                 Schema name (default: all non-system schemas)
+  -o, --output <output>                 Output directory [default: output]
+  -U, --username <username>             PostgreSQL username [default: postgres]
+  -W, --password <password>             PostgreSQL password (or set PGPASSWORD env var).  If password is not supplied on the command-line or via the environment variable, pg-extract-schema will ask for the password.
+  --version                             Show version information
+  -?, -h, --help                        Show help and usage information```
 ```
 
 ## Examples
-To extract schema information in JSON format:
+
 ```bash
-python extract_schema.py --db mydatabase --user myusername --password mypassword --format json
+pg-extract-schema.exe -h mypgserver -p 5432 -d mydatabase -U me -o c:\temp\pg_schema
 ```
-
-## Output Format
-The output can be generated in several formats:
-- JSON
-- CSV
-- SQL
-
-## Configuration
-Configuration options can be set in the `config.json` file. Refer to the sample configuration file for details on available options.
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
@@ -60,6 +67,4 @@ For support, please open an issue in the GitHub repository. We will try to respo
 
 ## Changelog
 ### [1.0.0] - 2026-03-19
-- Initial release with basic extraction functionalities.
-### [1.1.0] - 2026-03-19
-- Added support for additional output formats and configuration options.
+- Initial release
