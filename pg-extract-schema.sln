@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36717.8 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pg-extract-schema", "pg-extract-schema.csproj", "{ADD6D50B-5712-E462-0582-0C33FD67C26C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{ADD6D50B-5712-E462-0582-0C33FD67C26C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ADD6D50B-5712-E462-0582-0C33FD67C26C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ADD6D50B-5712-E462-0582-0C33FD67C26C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ADD6D50B-5712-E462-0582-0C33FD67C26C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6B84D9ED-3C0B-47BF-B9C2-D69D076F43F2}
+	EndGlobalSection
+EndGlobal
