@@ -43,7 +43,7 @@ Options:
   -U, --username <username>             PostgreSQL username [default: postgres]
   -W, --password <password>             PostgreSQL password (or set PGPASSWORD env var).  If password is not supplied on the command-line or via the environment variable, pg-extract-schema will ask for the password.
   --version                             Show version information
-  -?, -h, --help                        Show help and usage information```
+  -?, -h, --help                        Show help and usage information
 ```
 
 ## Examples
