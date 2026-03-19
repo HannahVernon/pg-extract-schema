@@ -4,7 +4,18 @@
 This project is designed to extract schema information from PostgreSQL databases in an efficient and comprehensive manner.
 
 ## Features
-- Extract schema details, including tables, views, indexes, sequences, and constraints.
+- Extracts DDL for the following object types, each into discrete `.sql` files:
+  - Extensions
+  - Schemas
+  - Sequences (with full attributes)
+  - Types (enums, composites, and domains)
+  - Tables (with columns, defaults, primary keys, unique constraints, check constraints, and comments)
+  - Indexes (non-PK, non-unique-constraint)
+  - Foreign keys
+  - Views
+  - Materialized views
+  - Functions and procedures
+  - Triggers
 
 ## Requirements
 - PostgreSQL 9.6 or later.
