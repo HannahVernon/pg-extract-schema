@@ -23,12 +23,17 @@ userOption.AddAlias("-U");
 var passwordOption = new Option<string?>("--password", description: "PostgreSQL password (or set PGPASSWORD env var)");
 passwordOption.AddAlias("-W");
 
+var includeSystemOption = new Option<bool>(
+    "--include-postgres-system-objects",
+    getDefaultValue: () => false,
+    description: "Include PostgreSQL system schemas (pg_catalog, pg_toast, information_schema, pg_temp) and the plpgsql extension");
+
 var rootCommand = new RootCommand("Extract DDL from a PostgreSQL database into discrete .sql files")
 {
-    hostOption, portOption, databaseOption, schemaOption, outputOption, userOption, passwordOption
+    hostOption, portOption, databaseOption, schemaOption, outputOption, userOption, passwordOption, includeSystemOption
 };
 
-rootCommand.SetHandler(async (host, port, database, schema, output, username, password) =>
+rootCommand.SetHandler(async (host, port, database, schema, output, username, password, includeSystem) =>
 {
     password ??= Environment.GetEnvironmentVariable("PGPASSWORD");
 
@@ -46,7 +51,7 @@ rootCommand.SetHandler(async (host, port, database, schema, output, username, pa
 
     try
     {
-        var extractor = new SchemaExtractor(connString, output, schema);
+        var extractor = new SchemaExtractor(connString, output, schema, includeSystem);
         await extractor.ExtractAllAsync();
         Console.WriteLine($"\nDone. DDL written to: {Path.GetFullPath(output)}");
     }
@@ -55,7 +60,7 @@ rootCommand.SetHandler(async (host, port, database, schema, output, username, pa
         Console.Error.WriteLine($"Error: {ex.Message}");
         Environment.ExitCode = 1;
     }
-}, hostOption, portOption, databaseOption, schemaOption, outputOption, userOption, passwordOption);
+}, hostOption, portOption, databaseOption, schemaOption, outputOption, userOption, passwordOption, includeSystemOption);
 
 return await rootCommand.InvokeAsync(args);
 

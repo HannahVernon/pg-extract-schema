@@ -7,12 +7,14 @@ public class SchemaExtractor
     private readonly string _connString;
     private readonly string _outputDir;
     private readonly string? _schemaFilter;
+    private readonly bool _includeSystemObjects;
 
-    public SchemaExtractor(string connString, string outputDir, string? schemaFilter)
+    public SchemaExtractor(string connString, string outputDir, string? schemaFilter, bool includeSystemObjects = false)
     {
         _connString = connString;
         _outputDir = outputDir;
         _schemaFilter = schemaFilter;
+        _includeSystemObjects = includeSystemObjects;
     }
 
     public async Task ExtractAllAsync()
@@ -39,6 +41,8 @@ public class SchemaExtractor
     {
         if (_schemaFilter != null)
             return $"{alias} = '{Sanitize(_schemaFilter)}'";
+        if (_includeSystemObjects)
+            return "TRUE";
         return $"{alias} NOT IN ('pg_catalog','information_schema','pg_toast') AND {alias} NOT LIKE 'pg_temp%'";
     }
 
@@ -69,11 +73,12 @@ public class SchemaExtractor
 
     private async Task ExtractExtensionsAsync(NpgsqlConnection conn)
     {
-        var sql = @"
+        var whereClause = _includeSystemObjects ? "" : "WHERE e.extname <> 'plpgsql'";
+        var sql = $@"
             SELECT e.extname, n.nspname
             FROM pg_extension e
             JOIN pg_namespace n ON n.oid = e.extnamespace
-            WHERE e.extname <> 'plpgsql'
+            {whereClause}
             ORDER BY e.extname";
 
         var rows = await QueryAsync(conn, sql, r => (
@@ -259,12 +264,13 @@ public class SchemaExtractor
 
     private async Task ExtractTablesAsync(NpgsqlConnection conn)
     {
+        var tableFilter = _includeSystemObjects ? "" : "AND c.relname NOT LIKE 'pg_%'";
         var sql = $@"
             SELECT n.nspname, c.relname
             FROM pg_class c
             JOIN pg_namespace n ON n.oid = c.relnamespace
             WHERE c.relkind = 'r' AND {SchemaWhereClause()}
-              AND c.relname NOT LIKE 'pg_%'
+              {tableFilter}
             ORDER BY n.nspname, c.relname";
 
         var tables = await QueryAsync(conn, sql, r => (
@@ -549,12 +555,13 @@ public class SchemaExtractor
 
     private async Task ExtractTriggersAsync(NpgsqlConnection conn)
     {
+        var internalFilter = _includeSystemObjects ? "" : "NOT t.tgisinternal AND";
         var sql = $@"
             SELECT n.nspname, c.relname, t.tgname, pg_get_triggerdef(t.oid, true)
             FROM pg_trigger t
             JOIN pg_class c ON c.oid = t.tgrelid
             JOIN pg_namespace n ON n.oid = c.relnamespace
-            WHERE NOT t.tgisinternal AND {SchemaWhereClause()}
+            WHERE {internalFilter} {SchemaWhereClause()}
             ORDER BY n.nspname, c.relname, t.tgname";
 
         var rows = await QueryAsync(conn, sql, r => (
