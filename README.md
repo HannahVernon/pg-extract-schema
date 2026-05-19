@@ -53,6 +53,8 @@ Options:
   -o, --output <output>                 Output directory [default: output]
   -U, --username <username>             PostgreSQL username [default: postgres]
   -W, --password <password>             PostgreSQL password (or set PGPASSWORD env var).  If password is not supplied on the command-line or via the environment variable, pg-extract-schema will ask for the password.
+  --include-postgres-system-objects     Include PostgreSQL system schemas (pg_catalog, pg_toast, information_schema, pg_temp) and the plpgsql extension [default: False]
+  --include-pg-toast                    Include pg_toast schema objects (excluded by default) [default: False]
   --version                             Show version information
   -?, -h, --help                        Show help and usage information
 ```

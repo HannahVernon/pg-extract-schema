@@ -8,13 +8,15 @@ public class SchemaExtractor
     private readonly string _outputDir;
     private readonly string? _schemaFilter;
     private readonly bool _includeSystemObjects;
+    private readonly bool _includePgToast;
 
-    public SchemaExtractor(string connString, string outputDir, string? schemaFilter, bool includeSystemObjects = false)
+    public SchemaExtractor(string connString, string outputDir, string? schemaFilter, bool includeSystemObjects = false, bool includePgToast = false)
     {
         _connString = connString;
         _outputDir = outputDir;
         _schemaFilter = schemaFilter;
         _includeSystemObjects = includeSystemObjects;
+        _includePgToast = includePgToast;
     }
 
     public async Task ExtractAllAsync()
@@ -43,7 +45,9 @@ public class SchemaExtractor
             return $"{alias} = '{Sanitize(_schemaFilter)}'";
         if (_includeSystemObjects)
             return "TRUE";
-        return $"{alias} NOT IN ('pg_catalog','information_schema','pg_toast') AND {alias} NOT LIKE 'pg_temp%'";
+        if (_includePgToast)
+            return $"{alias} NOT IN ('pg_catalog','information_schema') AND {alias} NOT LIKE 'pg_temp%'";
+        return $"{alias} NOT IN ('pg_catalog','information_schema','pg_toast') AND {alias} NOT LIKE 'pg_temp%' AND {alias} NOT LIKE 'pg_toast_temp%'";
     }
 
     private static string Sanitize(string s) => s.Replace("'", "''");
