@@ -28,13 +28,28 @@ var includeSystemOption = new Option<bool>(
     getDefaultValue: () => false,
     description: "Include PostgreSQL system schemas (pg_catalog, pg_toast, information_schema, pg_temp) and the plpgsql extension");
 
+var includePgToastOption = new Option<bool>(
+    "--include-pg-toast",
+    getDefaultValue: () => false,
+    description: "Include pg_toast schema objects (excluded by default)");
+
 var rootCommand = new RootCommand("Extract DDL from a PostgreSQL database into discrete .sql files")
 {
-    hostOption, portOption, databaseOption, schemaOption, outputOption, userOption, passwordOption, includeSystemOption
+    hostOption, portOption, databaseOption, schemaOption, outputOption, userOption, passwordOption, includeSystemOption, includePgToastOption
 };
 
-rootCommand.SetHandler(async (host, port, database, schema, output, username, password, includeSystem) =>
+rootCommand.SetHandler(async (context) =>
 {
+    var host = context.ParseResult.GetValueForOption(hostOption)!;
+    var port = context.ParseResult.GetValueForOption(portOption);
+    var database = context.ParseResult.GetValueForOption(databaseOption)!;
+    var schema = context.ParseResult.GetValueForOption(schemaOption);
+    var output = context.ParseResult.GetValueForOption(outputOption)!;
+    var username = context.ParseResult.GetValueForOption(userOption)!;
+    var password = context.ParseResult.GetValueForOption(passwordOption);
+    var includeSystem = context.ParseResult.GetValueForOption(includeSystemOption);
+    var includePgToast = context.ParseResult.GetValueForOption(includePgToastOption);
+
     password ??= Environment.GetEnvironmentVariable("PGPASSWORD");
 
     if (password == null)
@@ -51,7 +66,7 @@ rootCommand.SetHandler(async (host, port, database, schema, output, username, pa
 
     try
     {
-        var extractor = new SchemaExtractor(connString, output, schema, includeSystem);
+        var extractor = new SchemaExtractor(connString, output, schema, includeSystem, includePgToast);
         await extractor.ExtractAllAsync();
         Console.WriteLine($"\nDone. DDL written to: {Path.GetFullPath(output)}");
     }
@@ -60,7 +75,7 @@ rootCommand.SetHandler(async (host, port, database, schema, output, username, pa
         Console.Error.WriteLine($"Error: {ex.Message}");
         Environment.ExitCode = 1;
     }
-}, hostOption, portOption, databaseOption, schemaOption, outputOption, userOption, passwordOption, includeSystemOption);
+});
 
 return await rootCommand.InvokeAsync(args);
 
