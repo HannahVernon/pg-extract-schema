@@ -4,23 +4,54 @@ namespace pg_extract_schema;
 
 public class SchemaExtractor
 {
+    // Every subdirectory WriteFileAsync writes into. Kept in sync manually with the
+    // "subdir" arguments used throughout this file - used only to know what --clean
+    // is allowed to remove, so a clean never touches anything outside these known
+    // extraction output folders (e.g. .git, README.md, if _outputDir happens to be a
+    // git working copy).
+    private static readonly string[] KnownOutputSubdirs =
+    [
+        "extensions", "schemas", "sequences", "types", "tables",
+        "indexes", "foreign_keys", "views", "materialized_views",
+        "functions", "procedures", "triggers"
+    ];
+
     private readonly string _connString;
     private readonly string _outputDir;
     private readonly string? _schemaFilter;
     private readonly bool _includeSystemObjects;
     private readonly bool _includePgToast;
+    private readonly bool _clean;
 
-    public SchemaExtractor(string connString, string outputDir, string? schemaFilter, bool includeSystemObjects = false, bool includePgToast = false)
+    public SchemaExtractor(string connString, string outputDir, string? schemaFilter, bool includeSystemObjects = false, bool includePgToast = false, bool clean = false)
     {
         _connString = connString;
         _outputDir = outputDir;
         _schemaFilter = schemaFilter;
         _includeSystemObjects = includeSystemObjects;
         _includePgToast = includePgToast;
+        _clean = clean;
+    }
+
+    // Deletes only the known extraction output subdirectories (not _outputDir itself),
+    // so a stale file left behind by a dropped database object (e.g. a foreign key or
+    // table that no longer exists in the source) cannot survive a re-extraction into
+    // the same output directory.
+    private void CleanOutputDirectories()
+    {
+        foreach (var subdir in KnownOutputSubdirs)
+        {
+            var dir = Path.Combine(_outputDir, subdir);
+            if (Directory.Exists(dir))
+                Directory.Delete(dir, recursive: true);
+        }
     }
 
     public async Task ExtractAllAsync()
     {
+        if (_clean)
+            CleanOutputDirectories();
+
         await using var conn = new NpgsqlConnection(_connString);
         await conn.OpenAsync();
 
