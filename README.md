@@ -16,6 +16,7 @@ This project is designed to extract schema information from PostgreSQL databases
   - Materialized views
   - Functions and procedures
   - Triggers
+- Optional `--clean` flag removes previously extracted files for object types that no longer exist in the source database before writing new ones
 
 ## Requirements
 - PostgreSQL 9.6 or later.
@@ -55,6 +56,7 @@ Options:
   -W, --password <password>             PostgreSQL password (or set PGPASSWORD env var).  If password is not supplied on the command-line or via the environment variable, pg-extract-schema will ask for the password.
   --include-postgres-system-objects     Include PostgreSQL system schemas (pg_catalog, pg_toast, information_schema, pg_temp) and the plpgsql extension [default: False]
   --include-pg-toast                    Include pg_toast schema objects (excluded by default) [default: False]
+  --clean                               Delete existing extracted schema-object subdirectories under --output before extracting, so files for objects dropped from the source database since the last extraction do not linger [default: False]
   --version                             Show version information
   -?, -h, --help                        Show help and usage information
 ```
@@ -79,5 +81,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 For support, please open an issue in the GitHub repository. We will try to respond as quickly as possible.
 
 ## Changelog
+### [Unreleased]
+- Added `--clean` option: deletes existing extracted schema-object subdirectories (`tables`, `foreign_keys`, etc.) under `--output` before extracting, so files for objects dropped from the source database since the last extraction no longer linger. Without `--clean`, extraction only ever creates or overwrites files, so a table or foreign key removed from the database stays behind as a stale file in a repeated extraction into the same output directory.
+
 ### [1.0.0] - 2026-03-19
 - Initial release
