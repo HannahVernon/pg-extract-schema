@@ -33,9 +33,14 @@ var includePgToastOption = new Option<bool>(
     getDefaultValue: () => false,
     description: "Include pg_toast schema objects (excluded by default)");
 
+var cleanOption = new Option<bool>(
+    "--clean",
+    getDefaultValue: () => false,
+    description: "Delete existing extracted schema-object subdirectories (tables, foreign_keys, etc.) under --output before extracting, so files for objects dropped from the source database since the last extraction do not linger");
+
 var rootCommand = new RootCommand("Extract DDL from a PostgreSQL database into discrete .sql files")
 {
-    hostOption, portOption, databaseOption, schemaOption, outputOption, userOption, passwordOption, includeSystemOption, includePgToastOption
+    hostOption, portOption, databaseOption, schemaOption, outputOption, userOption, passwordOption, includeSystemOption, includePgToastOption, cleanOption
 };
 
 rootCommand.SetHandler(async (context) =>
@@ -49,6 +54,7 @@ rootCommand.SetHandler(async (context) =>
     var password = context.ParseResult.GetValueForOption(passwordOption);
     var includeSystem = context.ParseResult.GetValueForOption(includeSystemOption);
     var includePgToast = context.ParseResult.GetValueForOption(includePgToastOption);
+    var clean = context.ParseResult.GetValueForOption(cleanOption);
 
     password ??= Environment.GetEnvironmentVariable("PGPASSWORD");
 
@@ -66,7 +72,7 @@ rootCommand.SetHandler(async (context) =>
 
     try
     {
-        var extractor = new SchemaExtractor(connString, output, schema, includeSystem, includePgToast);
+        var extractor = new SchemaExtractor(connString, output, schema, includeSystem, includePgToast, clean);
         await extractor.ExtractAllAsync();
         Console.WriteLine($"\nDone. DDL written to: {Path.GetFullPath(output)}");
     }
